@@ -1,0 +1,9 @@
+#
+# Sample properties file for unit tests. 
+#
+# Set your Instagram client ID , secret, and an access token before running tests and 
+# rename this file to test.properties in your system.
+#
+client.id=MY_CLIENT_ID
+client.secret=MY_CLIENT_SECRET
+access.token=AN_ACCESS_TOKEN
