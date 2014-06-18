@@ -31,6 +31,8 @@ public class TestUser extends TestBase {
 
     public void testCurrentUser() throws InstagramException {
     	InstagramClient client = createClient();
+    	client.setSignedHeaderEnabled(true);
+    	client.setClientIps("127.0.0.1");
     	
     	Result<User> result = client.getCurrentUser();
     	Assert.assertNotNull(result);
@@ -38,6 +40,7 @@ public class TestUser extends TestBase {
     	Assert.assertTrue(result.getMeta().isSuccess());
     	Assert.assertNotNull(result.getData());
     	
-    	Assert.assertEquals("James Jory", result.getData().getFullName());
+    	Assert.assertEquals("VinTank", result.getData().getFullName());
+    	Assert.assertNotNull(result.getData().getCounts());
     }
 }

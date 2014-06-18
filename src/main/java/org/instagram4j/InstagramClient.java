@@ -23,9 +23,33 @@ import org.instagram4j.entity.RelationshipAction;
 import org.instagram4j.entity.Subscription;
 import org.instagram4j.entity.User;
 
+/**
+ * Interface for accessing all API endpoints and configuring driver behavior. 
+ */
 public interface InstagramClient {
 	String getClientId();
 	String getClientSecret();
+	
+	/**
+	 * Indicates if signed header enforcement is enabled for this client or not. 
+	 * You must enable signed header checking for your client on Instagram's developer
+	 * portal as well as for your client here. 
+	 * @return true if the signed header is included with each request
+	 * @see http://instagram.com/developer/restrict-api-requests/
+	 */
+	boolean isSignedHeaderEnabled();
+	/**
+	 * Enables/disables signed header in all API requests (X-Insta-Forwarded-For header).
+	 * @param enabled Enable or disable header in requests
+	 * @see http://instagram.com/developer/restrict-api-requests/
+	 */
+	void setSignedHeaderEnabled(boolean enabled);
+	
+	/**
+	 * Set client IP(s) for this client. Used when creating the signed header.
+	 * @param ips Comma-delimited list of client IP addresses to use when building signed header
+	 */
+	void setClientIps(String ips);
 	
 	String getAccessToken();
 	void setAccessToken(String token);

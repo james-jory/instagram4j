@@ -19,6 +19,11 @@ import java.io.IOException;
 
 import org.apache.http.HttpStatus;
 
+/**
+ * Raised when an error occurs accessing the API or when processing 
+ * the response from the API. If an actual response was received from 
+ * the API, the {@link #getMeta() Meta} details will be available. 
+ */
 public class InstagramException extends IOException {
 	private static final long serialVersionUID = 1L;
 	private ResultMeta meta;
@@ -41,6 +46,11 @@ public class InstagramException extends IOException {
 		super(message, cause);
 	}
 
+	/**
+	 * Returns a descriptive message describing the exception. The meta information, if available, 
+	 * is used as well as the HTTP status information.
+	 * @return
+	 */
 	@Override
 	public String getMessage() {
 		if (meta != null && meta.getCode() > 200) {
@@ -75,6 +85,8 @@ public class InstagramException extends IOException {
 					msg = "Instagram servers are temporarily overloaded. Try again later."; break;
 				case HttpStatus.SC_GATEWAY_TIMEOUT:
 					msg = "Instagram servers are temporarily overloaded. Try again later."; break;
+				case 429:
+					msg = "You have exceeded the Instagram API rate limit. Try again later."; break;
 				}
 			}
 			
@@ -96,6 +108,11 @@ public class InstagramException extends IOException {
 		return s.toString();
 	}
 
+	/**
+	 * If there are error details available either in the meta or HTTP status message, they 
+	 * will be returned. Otherwise a blank String will be returned.
+	 * @return
+	 */
 	public String getDetails() {
 		if (meta != null) {
 			if (meta.getCode() != 200) 
@@ -107,6 +124,10 @@ public class InstagramException extends IOException {
 		return "";
 	}
 	
+	/**
+	 * HTTP status code returned by API
+	 * @return
+	 */
 	public int getStatusCode() {
 		return statusCode;
 	}
@@ -115,6 +136,10 @@ public class InstagramException extends IOException {
 		this.statusCode = statusCode;
 	}
 
+	/**
+	 * HTTP status message returned by API.
+	 * @return
+	 */
 	public String getStatusMessage() {
 		return statusMessage;
 	}
@@ -123,6 +148,28 @@ public class InstagramException extends IOException {
 		this.statusMessage = statusMessage;
 	}
 
+	/**
+	 * Returns true if response indicates a rate limit has been exceeded.
+	 * 
+	 * @return true if API rate limit has been exceeded
+	 * @see http://developers.instagram.com/post/87743402071/new-tools-and-rate-limits-for-post-endpoints
+	 */
+	public boolean isRateLimitExceeded() {
+		if (getStatusCode() == 429)
+			return true;
+		
+		if (getMeta() != null && getMeta().getCode() == 429)
+			return true;
+		
+		return false;
+	}
+
+	/**
+	 * Returns the URL used to access the API when the exception occurred. Useful for 
+	 * debugging purposes--not intended for end-user display.
+	 * 
+	 * @return URL used to access the API when exception occurred
+	 */
 	public String getUrl() {
 		return url;
 	}
@@ -131,6 +178,10 @@ public class InstagramException extends IOException {
 		this.url = url;
 	}
 
+	/**
+	 * Meta details returned in API response, if available.
+	 * @return Meta details from response if available or null
+	 */
 	public ResultMeta getMeta() {
 		return meta;
 	}

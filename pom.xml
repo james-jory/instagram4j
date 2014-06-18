@@ -4,7 +4,7 @@
 	
 	<groupId>org.instagram4j</groupId>
 	<artifactId>instagram4j</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4</version>
 	<packaging>jar</packaging>
 	
 	<name>instagram4j</name>
@@ -36,8 +36,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		
-		<jackson.version>2.1.0</jackson.version>
-		<httpclient.version>4.2.2</httpclient.version>
+		<jackson.version>2.3.2</jackson.version>
+		<httpclient.version>4.2.5</httpclient.version>
 		<junit.version>4.11</junit.version>
 	</properties>
 	

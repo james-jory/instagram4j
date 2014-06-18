@@ -19,11 +19,17 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -59,15 +65,25 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 
+/**
+ * Default driver implementation that accesses the API using the Apache Commons 
+ * HTTP client library and parses responses using the Jackson JSON library. 
+ */
 public class DefaultInstagramClient implements InstagramClient {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultInstagramClient.class);
 	
 	private static final JsonFactory JSON_FACTORY = new MappingJsonFactory();
 	private static final URLCodec ENCODER = new URLCodec("UTF-8");
 	
+	private static final String HMAC_SHA256_ALGO = "HmacSHA256";
+	
 	private final String clientId;
 	private final String clientSecret;
 	private String accessToken;
+	
+	private boolean signedHeaderEnabled;
+	private String clientIps;
+	
 	private long autoThrottle;
 	private long lastCallTicks;
 
@@ -89,6 +105,24 @@ public class DefaultInstagramClient implements InstagramClient {
 	@Override
 	public String getClientSecret() {
 		return clientSecret;
+	}
+
+	@Override
+	public boolean isSignedHeaderEnabled() {
+		return signedHeaderEnabled;
+	}
+
+	@Override
+	public void setSignedHeaderEnabled(boolean enabled) {
+		signedHeaderEnabled = enabled;
+	}
+
+	public String getClientIps() {
+		return clientIps;
+	}
+
+	public void setClientIps(String clientIps) {
+		this.clientIps = clientIps;
 	}
 
 	@Override
@@ -467,6 +501,37 @@ public class DefaultInstagramClient implements InstagramClient {
 		return requestEntity(get, type);
 	}
 	
+	private void setEnforceHeader(HttpRequestBase method) {
+		if (!isSignedHeaderEnabled())
+			return;
+		
+		if (clientSecret == null)
+			throw new IllegalStateException("Client secret it required to use signed header");
+		
+		if (clientIps == null || clientIps.length() == 0)
+			throw new IllegalStateException("Client IP(s) required to use signed header");
+
+		try {
+			SecretKeySpec signingKey = new SecretKeySpec(getClientSecret().getBytes(), HMAC_SHA256_ALGO);
+			
+			Mac mac = Mac.getInstance(HMAC_SHA256_ALGO);
+			mac.init(signingKey);
+	
+			// Compute the hmac on IP address.
+			byte[] rawHmac = mac.doFinal(clientIps.getBytes());
+			
+			String digest = Hex.encodeHexString(rawHmac);
+			
+			method.setHeader("X-Insta-Forwarded-For", String.format("%s|%s", clientIps, digest));
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Unexpected error creating signed header using HMAC-SHA256", e);
+		} 
+		catch (InvalidKeyException e) {
+			throw new IllegalStateException("Unexpected error creating signed header using HMAC-SHA256", e);
+		}
+	}
+	
 	private <T> Result<T> requestEntity(HttpRequestBase method, Class<T> type) throws InstagramException {
 		method.getParams().setParameter("http.useragent", "Instagram4j/1.0");
         
@@ -476,6 +541,7 @@ public class DefaultInstagramClient implements InstagramClient {
 
 		try {
 			method.getParams().setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, "UTF-8");
+			setEnforceHeader(method);
 	        
 			HttpClient client = new DefaultHttpClient();
 			client.getParams().setParameter(AllClientPNames.CONNECTION_TIMEOUT, 15000);
@@ -562,6 +628,7 @@ public class DefaultInstagramClient implements InstagramClient {
 		
 		try {
 			method.getParams().setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, "UTF-8");
+			setEnforceHeader(method);
 	        
 			HttpClient client = new DefaultHttpClient();
 			client.getParams().setParameter(AllClientPNames.CONNECTION_TIMEOUT, 15000);
@@ -721,7 +788,7 @@ public class DefaultInstagramClient implements InstagramClient {
 			throw new InstagramException("Received unexpected response from Instagram: " + (responseBody.length() > 100 ? responseBody.substring(0, 100) : responseBody));
 		}
 
-		return JSON_FACTORY.createJsonParser(responseBody);
+		return JSON_FACTORY.createParser(responseBody);
 	}
 	
 	private InstagramException createInstagramException(String msg, String url, HttpResponse response, ResultMeta meta, Throwable t) {
