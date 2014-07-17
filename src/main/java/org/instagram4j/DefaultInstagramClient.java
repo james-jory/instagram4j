@@ -289,7 +289,7 @@ public class DefaultInstagramClient implements InstagramClient {
 			throw new IllegalArgumentException("Unexpected error building Instagram request", e);
 		}
 		
-		Result<?> result = requestEntity(post, null);
+		Result<?> result = requestEntity(post, null, true);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error adding comment to photo", post.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -302,7 +302,7 @@ public class DefaultInstagramClient implements InstagramClient {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/media/%s/comments/%s?access_token=%s", 
 				mediaId, commentId, accessToken));
 
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting comment from photo", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -323,7 +323,7 @@ public class DefaultInstagramClient implements InstagramClient {
 			throw new IllegalArgumentException("Unexpected error building Instagram request", e);
 		}
 		
-		Result<?> result = requestEntity(post, null);
+		Result<?> result = requestEntity(post, null, true);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error liking photo", post.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -336,7 +336,7 @@ public class DefaultInstagramClient implements InstagramClient {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/media/%s/likes?access_token=%s", 
 				mediaId, accessToken));
 
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error unliking photo", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -358,7 +358,7 @@ public class DefaultInstagramClient implements InstagramClient {
 			throw new IllegalArgumentException("Unexpected error building Instagram request", e);
 		}
 		
-		return requestEntity(post, Relationship.class);
+		return requestEntity(post, Relationship.class, true);
 	}
 	
 	@Override
@@ -408,7 +408,7 @@ public class DefaultInstagramClient implements InstagramClient {
 			throw new IllegalArgumentException("Unexpected error building Instagram request", e);
 		}
 		
-		return requestEntity(post, Subscription.class);
+		return requestEntity(post, Subscription.class, false);
 	}
 
 	@Override
@@ -423,7 +423,7 @@ public class DefaultInstagramClient implements InstagramClient {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/subscriptions?id=%s&client_id=%s&client_secret=%s", 
 				subscriptionId, clientId, clientSecret));
 
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting subscription", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -432,7 +432,7 @@ public class DefaultInstagramClient implements InstagramClient {
 	public void deleteUserSubscription() throws InstagramException {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/subscriptions?object=user&client_id=%s&client_secret=%s", 
 				clientId, clientSecret));
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting user subscription", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -441,7 +441,7 @@ public class DefaultInstagramClient implements InstagramClient {
 	public void deleteTagSubscriptions() throws InstagramException {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/subscriptions?object=tag&client_id=%s&client_secret=%s", 
 				clientId, clientSecret));
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting tag subscriptions", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -450,7 +450,7 @@ public class DefaultInstagramClient implements InstagramClient {
 	public void deleteLocationSubscriptions() throws InstagramException {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/subscriptions?object=location&client_id=%s&client_secret=%s", 
 				clientId, clientSecret));
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting location subscription", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -459,7 +459,7 @@ public class DefaultInstagramClient implements InstagramClient {
 	public void deleteGeoSubscriptions() throws InstagramException {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/subscriptions?object=geographytag&client_id=%s&client_secret=%s", 
 				clientId, clientSecret));
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting geo subscription", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -468,7 +468,7 @@ public class DefaultInstagramClient implements InstagramClient {
 	public void deleteAllSubscriptions() throws InstagramException {
 		HttpDelete delete = new HttpDelete(String.format("https://api.instagram.com/v1/subscriptions?object=all&client_id=%s&client_secret=%s", 
 				clientId, clientSecret));
-		Result<?> result = requestEntity(delete, null);
+		Result<?> result = requestEntity(delete, null, false);
 		if (result != null && result.getMeta() != null && !result.getMeta().isSuccess())
         	throw createInstagramException("Error deleting subscriptions", delete.getURI().toString(), null, result.getMeta(), null);
 	}
@@ -493,12 +493,12 @@ public class DefaultInstagramClient implements InstagramClient {
 			throw new IllegalArgumentException("Unexpected error building Instagram request", e);
 		}
 		
-		return requestEntity(post, Subscription.class);
+		return requestEntity(post, Subscription.class, false);
 	}
 
 	private <T> Result<T> queryEntity(String url, Class<T> type) throws InstagramException {
         HttpGet get = new HttpGet(url);
-		return requestEntity(get, type);
+		return requestEntity(get, type, false);
 	}
 	
 	private void setEnforceHeader(HttpRequestBase method) {
@@ -532,7 +532,7 @@ public class DefaultInstagramClient implements InstagramClient {
 		}
 	}
 	
-	private <T> Result<T> requestEntity(HttpRequestBase method, Class<T> type) throws InstagramException {
+	private <T> Result<T> requestEntity(HttpRequestBase method, Class<T> type, boolean signableRequest) throws InstagramException {
 		method.getParams().setParameter("http.useragent", "Instagram4j/1.0");
         
 		JsonParser jp = null;
@@ -541,7 +541,8 @@ public class DefaultInstagramClient implements InstagramClient {
 
 		try {
 			method.getParams().setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, "UTF-8");
-			setEnforceHeader(method);
+			if (signableRequest)
+				setEnforceHeader(method);
 	        
 			HttpClient client = new DefaultHttpClient();
 			client.getParams().setParameter(AllClientPNames.CONNECTION_TIMEOUT, 15000);

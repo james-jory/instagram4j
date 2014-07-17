@@ -17,7 +17,8 @@ Below are just a few examples of how to use the driver to access the API.
 
 ```
 try {
-	InstagramClient client = new DefaultInstagramClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, AN_ACCESS_TOKEN);
+	InstagramClient client = new DefaultInstagramClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, 
+			AN_ACCESS_TOKEN);
 
 	Result<Media> result = client.getMedia(A_MEDIA_ID);
 	Media media = result.getData();
@@ -33,11 +34,13 @@ catch (InstagramException e) {
 
 ```
 try {
-	InstagramClient client = new DefaultInstagramClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, AN_ACCESS_TOKEN);
+	InstagramClient client = new DefaultInstagramClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, 
+			AN_ACCESS_TOKEN);
 
-	// The only required argument for this endpoint is the user ID. However, additional parameters 
-	// can specified using the Parameter class as shown here for "count".
-	Result<Media[]> result = client = client.getRecentMediaForUser(A_USER_ID, Parameter.as("count", 10));
+	// The only required argument for this endpoint is the user ID. However, additional 
+	// parameters can specified using the Parameter class as shown here for "count".
+	Result<Media[]> result = client = client.getRecentMediaForUser(A_USER_ID, 
+			Parameter.as("count", 10));
 	
 	while (result.getMeta().isSuccess() && result.getData().length > 0) {
 		for (Media media : result.getData()) {
@@ -62,9 +65,13 @@ To use signed requests you must enable them for your client ID in the [Instagram
 and tell the driver to use the signed header. 
 
 ```
-InstagramClient client = new DefaultInstagramClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, AN_ACCESS_TOKEN);
+InstagramClient client = new DefaultInstagramClient(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, 
+		AN_ACCESS_TOKEN);
+		
 client.setSignedHeaderEnabled(true);
+
 // Set to your actual client IP(s)... using loopback for testing.
+// Multiple IPs must be separated by commas.
 client.setClientIps("127.0.0.1");
 ``` 
 
